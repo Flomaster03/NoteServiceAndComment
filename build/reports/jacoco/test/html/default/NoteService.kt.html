@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ru"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NoteService.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">NoteService</a> &gt; <a href="index.source.html" class="el_package">default</a> &gt; <span class="el_source">NoteService.kt</span></div><h1>NoteService.kt</h1><pre class="source lang-java linenums"><span class="fc" id="L1">class NoteService&lt;T&gt; {</span>
+
+<span class="fc" id="L3">    private val notesList = mutableListOf&lt;Note&gt;()</span>
+<span class="fc" id="L4">    private val commentList = mutableListOf&lt;Note.Comment&gt;()</span>
+<span class="fc" id="L5">    private var nextID = 1</span>
+
+    fun addNote(note: Note): Note {
+<span class="fc" id="L8">        val newNote = note.copy(noteID = nextID++)</span>
+<span class="fc" id="L9">        notesList.add(newNote)</span>
+<span class="fc" id="L10">        return notesList.last()</span>
+    }
+
+    fun deleteNote(id: Int): Boolean {
+<span class="fc" id="L14">        var change = false</span>
+<span class="fc bfc" id="L15" title="All 2 branches covered.">        for ((index, value) in notesList.withIndex()) {</span>
+<span class="fc bfc" id="L16" title="All 4 branches covered.">            if (id == value.noteID &amp;&amp; value.isDeleted == false) {</span>
+<span class="fc" id="L17">                notesList[index] = value.copy(isDeleted = true)</span>
+<span class="pc bpc" id="L18" title="2 of 4 branches missed.">                if (commentList.isNotEmpty()) {</span>
+<span class="fc" id="L19">                    val commentIsDelete = commentList.get(index)</span>
+<span class="fc" id="L20">                    commentList[index] = commentIsDelete.copy(isDeleted = true)</span>
+                }
+<span class="fc" id="L22">                change = true</span>
+<span class="fc" id="L23">                break</span>
+            }
+        }
+<span class="fc" id="L26">        return change</span>
+    }
+
+    fun editNote(note: Note): Boolean {
+<span class="fc" id="L30">        var change = false</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        for ((index, value) in notesList.withIndex()) {</span>
+<span class="fc bfc" id="L32" title="All 4 branches covered.">            if (note.noteID == value.noteID &amp;&amp; value.isDeleted == false) {</span>
+<span class="fc" id="L33">                notesList[index] = value.copy(</span>
+<span class="fc" id="L34">                    title = note.title,</span>
+<span class="fc" id="L35">                    text = note.text</span>
+                )
+<span class="fc" id="L37">                change = true</span>
+<span class="fc" id="L38">                break</span>
+            }
+        }
+<span class="fc" id="L41">        return change</span>
+    }
+
+    fun getByID(id: Int): Note {
+<span class="fc" id="L45">        val listByID = mutableListOf&lt;Note&gt;()</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        for (note in notesList) {</span>
+<span class="fc bfc" id="L47" title="All 4 branches covered.">            if (id == note.noteID &amp;&amp; note.isDeleted == false)</span>
+<span class="fc" id="L48">                listByID.add(note)</span>
+        }
+<span class="fc bfc" id="L50" title="All 4 branches covered.">        return if (listByID.isNotEmpty()) listByID.last() else throw CommentExeption(&quot;РџРѕ РґР°РЅРЅРѕРјСѓ ID Р·Р°РїРёСЃРµР№ РЅРµ РЅР°Р№РґРµРЅРѕ&quot;)</span>
+    }
+
+    fun createComment(comment: Note.Comment) {
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        for ((index, value) in notesList.withIndex()) {</span>
+<span class="fc bfc" id="L55" title="All 4 branches covered.">            if (value.noteID != comment.commentID &amp;&amp; (index &lt; notesList.size - 1)) {</span>
+<span class="fc" id="L56">                continue</span>
+<span class="fc bfc" id="L57" title="All 4 branches covered.">            } else if (value.noteID == comment.commentID &amp;&amp; value.isDeleted == false) {</span>
+<span class="fc" id="L58">                commentList.add(comment)</span>
+<span class="fc" id="L59">                break</span>
+            }
+<span class="fc" id="L61">            throw CommentExeption(&quot;Р­С‚РѕС‚ РєРѕРјРјРµРЅС‚Р°СЂРёР№ Рє РѕС‚СЃСѓС‚СЃС‚РІСѓСЋС‰РµР№ Р·Р°РјРµС‚РєРµ&quot;)</span>
+        }
+
+<span class="fc" id="L64">    }</span>
+
+    fun deleteComment(id: Int): Boolean {
+<span class="fc" id="L67">        var change = false</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        for ((index, value) in commentList.withIndex()) {</span>
+<span class="fc" id="L69">            when {</span>
+<span class="fc bfc" id="L70" title="All 4 branches covered.">                id != value.commentID &amp;&amp; (index &lt; commentList.size - 1) -&gt; continue</span>
+<span class="fc bfc" id="L71" title="All 4 branches covered.">                id == value.commentID &amp;&amp; value.isDeleted == false -&gt; {</span>
+<span class="fc" id="L72">                    commentList[index] = value.copy(isDeleted = true)</span>
+<span class="fc" id="L73">                    change = true</span>
+<span class="fc" id="L74">                    break</span>
+                }
+<span class="fc" id="L76">                else -&gt; throw CommentExeption(&quot;Р­С‚РѕС‚ РєРѕРјРјРµРЅС‚Р°СЂРёР№ СѓР¶Рµ СѓРґР°Р»РµРЅ, СѓРґР°Р»РµРЅРёРµ РЅРµРІРѕР·РјРѕР¶РЅРѕ&quot;)</span>
+            }
+        }
+<span class="fc" id="L79">        return change</span>
+    }
+
+    fun editComment(comment: Note.Comment): Boolean {
+<span class="fc" id="L83">        var change = false</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        for ((index, value) in commentList.withIndex()) {</span>
+<span class="fc" id="L85">            when {</span>
+<span class="fc bfc" id="L86" title="All 4 branches covered.">                comment.commentID != value.commentID &amp;&amp; (index &lt; commentList.size - 1) -&gt; continue</span>
+<span class="fc bfc" id="L87" title="All 4 branches covered.">                comment.commentID == value.commentID &amp;&amp; value.isDeleted == false -&gt; {</span>
+<span class="fc" id="L88">                    commentList[index] = value.copy(message = comment.message)</span>
+<span class="fc" id="L89">                    change = true</span>
+<span class="fc" id="L90">                    break</span>
+                }
+<span class="fc" id="L92">                else -&gt; throw CommentExeption(&quot;Р­С‚РѕС‚ РєРѕРјРјРµРЅС‚Р°СЂРёР№ СѓР¶Рµ СѓРґР°Р»РµРЅ,СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ РЅРµРІРѕР·РјРѕР¶РЅРѕ&quot;)</span>
+            }
+        }
+<span class="fc" id="L95">        return change</span>
+    }
+
+    fun getComments(id: Int): List&lt;Note.Comment&gt; {
+<span class="fc" id="L99">        val listByID = mutableListOf&lt;Note.Comment&gt;()</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        for (comment in commentList) {</span>
+<span class="fc bfc" id="L101" title="All 4 branches covered.">            if (id == comment.commentID &amp;&amp; comment.isDeleted == false)</span>
+<span class="fc" id="L102">                listByID.add(comment)</span>
+        }
+<span class="fc bfc" id="L104" title="All 4 branches covered.">        return if (listByID.isNotEmpty()) listByID else throw CommentExeption(&quot;РџРѕ РґР°РЅРЅРѕРјСѓ ID РєРѕРјРјРµРЅС‚Р°СЂРёРµРІ РЅРµ РЅР°Р№РґРµРЅРѕ&quot;)</span>
+    }
+
+    fun restoreComment(id: Int): Boolean {
+<span class="fc" id="L108">        var change = false</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        for ((index, value) in commentList.withIndex()) {</span>
+<span class="fc" id="L110">            when {</span>
+<span class="fc bfc" id="L111" title="All 4 branches covered.">                id != value.commentID &amp;&amp; (index &lt; commentList.size - 1) -&gt; continue</span>
+<span class="fc bfc" id="L112" title="All 4 branches covered.">                id == value.commentID &amp;&amp; value.isDeleted == true -&gt; {</span>
+<span class="fc" id="L113">                    commentList[index] = value.copy(isDeleted = false)</span>
+<span class="fc" id="L114">                    change = true</span>
+<span class="fc" id="L115">                    break</span>
+                }
+<span class="fc" id="L117">                else -&gt; throw CommentExeption(&quot;РќРµРІРѕР·РјРѕР¶РЅРѕ РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ РЅРµСѓРґР°Р»РµРЅРЅС‹Р№ РєРѕРјРјРµРЅС‚Р°СЂРёР№&quot;)</span>
+            }
+        }
+<span class="fc" id="L120">        return change</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
